@@ -45,7 +45,10 @@ public class SecurityConfig {
                 )
                 .authenticationManager(authManger)
                 .userDetailsService(userServ)
-                .formLogin(form -> form.permitAll())
+                .formLogin(form -> form
+                        .defaultSuccessUrl("/index.html", true)
+                        .permitAll()
+                )
                 .httpBasic(basic -> {});
                 return http.build();
     }
