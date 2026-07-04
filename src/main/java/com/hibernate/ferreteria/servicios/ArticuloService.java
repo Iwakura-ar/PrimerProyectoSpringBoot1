@@ -23,7 +23,7 @@ public class ArticuloService {
                 .collect(Collectors.toList());
     }
 
-    public ArticulosDTO serv_buscaID(long id) {
+    public ArticulosDTO serv_buscaID(Integer id) {
         Articulo artPorId = repo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Artículo no encontrado: " + id));
         return ArticuloMapper.toDTO(artPorId);
@@ -35,7 +35,7 @@ public class ArticuloService {
         return ArticuloMapper.toDTO(insertado);
     }
 
-    public ArticulosDTO serv_actualizar(long id, ArticulosDTO dto) {
+    public ArticulosDTO serv_actualizar(Integer id, ArticulosDTO dto) {
         Optional<Articulo> existe = repo.findById(id);
 
         if(existe.isPresent()) {
@@ -54,7 +54,7 @@ public class ArticuloService {
         }
     }
 
-    public String serv_eliminarArticulo(Long id) {
+    public String serv_eliminarArticulo(Integer id) {
         if (repo.existsById(id)) {
             repo.deleteById(id);
             return "Articulo eliminado correctamente";

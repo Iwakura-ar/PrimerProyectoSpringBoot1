@@ -21,7 +21,7 @@ public class ArticuloController {
         }
 
         @GetMapping("/{id}")
-        public ArticulosDTO buscaID(@PathVariable Long id) {
+        public ArticulosDTO buscaID(@PathVariable Integer id) {
                 return servicio.serv_buscaID(id);
         }
 
@@ -31,13 +31,13 @@ public class ArticuloController {
         }
 
         @PutMapping("/{id}")
-        public ArticulosDTO actualizar(@PathVariable long id,
+        public ArticulosDTO actualizar(@PathVariable Integer id,
                                        @RequestBody ArticulosDTO dto) {
                 return servicio.serv_actualizar(id, dto);
         }
 
         @DeleteMapping("/{id}")
-        public String eliminar(@PathVariable long id) {
+        public String eliminar(@PathVariable Integer id) {
                 return servicio.serv_eliminarArticulo(id);
         }
 }

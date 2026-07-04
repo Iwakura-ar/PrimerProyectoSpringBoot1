@@ -6,7 +6,7 @@ public class ArticulosDTO {
     private double precio;
     private int stock;
 
-    public ArticulosDTO(long id, String nombre_articulo, Double precio, int stock) {
+    public ArticulosDTO(int id, String nombre_articulo, Double precio, int stock) {
         this.id = id;
         this.nombre_articulo = nombre_articulo;
         this.precio = precio;
