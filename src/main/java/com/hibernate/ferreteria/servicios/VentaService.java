@@ -42,12 +42,12 @@ public class VentaService {
     public Venta registrarVenta(VentaRequestDTO request) {
 
         if (request.getItems() == null || request.getItems().isEmpty()) {
-            throw new IllegalArgumentException("La venta debe tener al menos un producto");
+            throw new IllegalArgumentException("ERROR: La venta debe tener al menos un producto");
         }
 
         Usuario usuario = repoUsuarios.findById(request.getUsuarioId())
                 .orElseThrow(() -> new IllegalArgumentException(
-                        "Usuario no encontrado: " + request.getUsuarioId()));
+                        "ERROR: Usuario no encontrado: " + request.getUsuarioId()));
 
         Venta venta = new Venta();
         venta.setFecha(LocalDateTime.now());
@@ -60,13 +60,12 @@ public class VentaService {
 
             Articulo articulo = repoArticulos.findById(item.getArticuloId())
                     .orElseThrow(() -> new IllegalArgumentException(
-                            "Articulo no encontrado: " + item.getArticuloId()));
+                            "ERROR: Articulo no encontrado: " + item.getArticuloId()));
 
             if (articulo.getStock() < item.getCantidad()) {
-                // Esto revierte TODA la venta gracias a @Transactional,
-                // incluyendo los descuentos de stock ya hechos en items previos.
+                // @Transactional, revierte toda la venta si el stock es insuficiente.
                 throw new IllegalStateException(
-                        "Stock insuficiente para " + articulo.getNombre_articulo()
+                        "ERROR: Stock insuficiente para " + articulo.getNombre_articulo()
                                 + " (disponible: " + articulo.getStock()
                                 + ", solicitado: " + item.getCantidad() + ")");
             }
