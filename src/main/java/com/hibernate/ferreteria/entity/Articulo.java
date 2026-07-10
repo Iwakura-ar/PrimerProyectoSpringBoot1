@@ -5,6 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.HashSet;
+import java.util.Set;
+
 //Creamos una clase con la etiqueta entidad para aclarar que hablamos de una tabla de
 //articulos
 @Entity
@@ -35,4 +38,6 @@ public class Articulo {
 
     //Con lombok nos evitamos los getters, setters y constructores para esta clase
 
+    @ManyToMany(mappedBy = "articulos")
+    private Set<Proveedor> proveedores = new HashSet<>();
 }
