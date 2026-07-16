@@ -13,4 +13,6 @@ public interface Repo_articulos extends JpaRepository<Articulo, Integer> {
     Double calcularValorInventario();
 
     List<Articulo> findByStockLessThan(Integer stock);
+
+    List<Articulo> findByActivoTrue();
 }

@@ -11,10 +11,11 @@
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #f0f2f5; }
         header { background-color: #1e90ff; padding: 20px; color: white; font-family: Verdana; text-align: center; font-size: 2em; display: flex; align-items: center; justify-content: center; gap: 10px; }
         nav { background-color: #007bff; color: white; display: flex; justify-content: center; gap: 20px; padding: 10px 0; font-size: 16px; font-weight: bold; }
-        nav a { color: white; text-decoration: none; padding: 8px 15px; border-radius: 5px; }
+        nav a { color: white; text-decoration: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
         nav a:hover { background-color: #0056b3; }
+        nav a.active { background-color: #0056b3; }
         h3 { text-align: center; font-family: Verdana; color: #333; font-size: 1.8em; margin-top: 20px; }
-        #panel { padding: 20px; background: white; margin: 20px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0,0,0,0.1); }
+        .panel { padding: 20px; background: white; margin: 20px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0,0,0,0.1); }
         button { margin: 5px; padding: 10px 15px; border: none; border-radius: 5px; color: white; cursor: pointer; font-size: 14px; }
         .btn-blue { background-color: #007bff; }
         .btn-green { background-color: #28a745; }
@@ -25,7 +26,13 @@
         th, td { padding: 12px; border: 1px solid #ddd; text-align: center; }
         th { background-color: #e9ecef; }
         input { padding: 8px; margin: 5px; border: 1px solid #ccc; border-radius: 5px; }
-        #tablaResultados { margin: 20px; }
+        .tablaResultados { margin: 20px; }
+
+        /* C/seccion ocupa toda la pagina cuando esta activa, y se oculta cuando no */
+        .seccion { display: none; }
+        .seccion.activa { display: block; }
+
+        .placeholder { text-align: center; color: #888; padding: 40px; font-style: italic; }
     </style>
 </head>
 
@@ -36,164 +43,432 @@
 </header>
 
 <nav>
-    <a href="#">Productos</a>
-    <a href="#">Proveedores</a>
-    <a href="#">Ventas</a>
-    <a href="#">Usuarios</a>
-    <a href="#">Almacen</a>
-    <a href="#">Reportes</a>
+    <a data-seccion="productos" onclick="mostrarSeccion('productos')">Productos</a>
+    <a data-seccion="proveedores" onclick="mostrarSeccion('proveedores')">Proveedores</a>
+    <a data-seccion="ventas" onclick="mostrarSeccion('ventas')">Ventas</a>
+    <a data-seccion="usuarios" onclick="mostrarSeccion('usuarios')">Usuarios</a>
+    <a data-seccion="almacen" onclick="mostrarSeccion('almacen')">Almacen</a>
+    <a data-seccion="reportes" onclick="mostrarSeccion('reportes')">Reportes</a>
 </nav>
 
-<h3>Control de Inventario</h3>
+<!-- ========================= SECCION: PRODUCTOS ========================= -->
+<div id="seccion-productos" class="seccion">
+    <h3>Control de Inventario</h3>
 
-<div id="panel">
-    <button class="btn-blue" onclick="listarProductos()"><i class="fas fa-box"></i> Listar Productos</button>
-    <button class="btn-blue" onclick="buscarProductoId()"><i class="fas fa-search"></i> Buscar Producto</button>
-    <hr>
-    <button class="btn-green" onclick="mostrarFormularioActualizar()"><i class="fas fa-edit"></i> Actualizar Productos</button>
-    <button class="btn-gray" onclick="mostrarFormularioEliminar()"><i class="fas fa-trash"></i> Eliminar Productos</button>
-    <button class="btn-orange" onclick="mostrarFormularioInsertar()"><i class="fas fa-plus"></i> Insertar Productos</button>
+    <div class="panel">
+        <button class="btn-blue" onclick="listarProductos()"><i class="fas fa-box"></i> Listar Productos</button>
+        <button class="btn-blue" onclick="buscarProductoId()"><i class="fas fa-search"></i> Buscar Producto</button>
+        <hr>
+        <button class="btn-green" onclick="mostrarFormularioActualizar()"><i class="fas fa-edit"></i> Actualizar Productos</button>
+        <button class="btn-gray" onclick="mostrarFormularioEliminar()"><i class="fas fa-trash"></i> Eliminar Productos</button>
+        <button class="btn-orange" onclick="mostrarFormularioInsertar()"><i class="fas fa-plus"></i> Insertar Productos</button>
+    </div>
+
+    <div id="formularios-productos" style="margin: 20px;"></div>
+    <div id="tablaResultados-productos" class="tablaResultados"></div>
 </div>
 
-<div id="formularios" style="margin: 20px;"></div>
-<div id="tablaResultados"></div>
+<!-- ========================= SECCION: PROVEEDORES ========================= -->
+<div id="seccion-proveedores" class="seccion">
+    <h3>Proveedores</h3>
+    <div class="panel" id="panel-proveedores">
+        <button class="btn-blue" onclick="listarProveedores()"><i class="fas fa-truck"></i> Listar Proveedores</button>
+        <button class="btn-blue" onclick="buscarProveedorId()"><i class="fas fa-search"></i> Buscar Proveedor</button>
+        <hr>
+        <button class="btn-green" onclick="mostrarFormularioActualizarProveedor()"><i class="fas fa-edit"></i> Actualizar Proveedor</button>
+        <button class="btn-gray" onclick="mostrarFormularioEliminarProveedor()"><i class="fas fa-trash"></i> Eliminar Proveedor</button>
+        <button class="btn-orange" onclick="mostrarFormularioInsertarProveedor()"><i class="fas fa-plus"></i> Insertar Proveedor</button>
+        <hr>
+        <button class="btn-blue" onclick="mostrarFormularioAsociarArticulos()"><i class="fas fa-link"></i> Asociar Artículos</button>
+    </div>
+    <div id="formularios-proveedores" style="margin: 20px;"></div>
+    <div id="tablaResultados-proveedores" class="tablaResultados"></div>
+</div>
+
+<!-- ========================= SECCION: VENTAS ========================= -->
+<div id="seccion-ventas" class="seccion">
+    <h3>Ventas</h3>
+    <div class="panel" id="panel-ventas">
+        <p class="placeholder">Próximamente</p>
+    </div>
+    <div id="formularios-ventas" style="margin: 20px;"></div>
+    <div id="tablaResultados-ventas" class="tablaResultados"></div>
+</div>
+
+<!-- ========================= SECCION: USUARIOS ========================= -->
+<div id="seccion-usuarios" class="seccion">
+    <h3>Usuarios</h3>
+    <div class="panel" id="panel-usuarios">
+        <p class="placeholder">Próximamente</p>
+    </div>
+    <div id="formularios-usuarios" style="margin: 20px;"></div>
+    <div id="tablaResultados-usuarios" class="tablaResultados"></div>
+</div>
+
+<!-- ========================= SECCION: ALMACEN ========================= -->
+<div id="seccion-almacen" class="seccion">
+    <h3>Almacén</h3>
+    <div class="panel" id="panel-almacen">
+        <p class="placeholder">Próximamente</p>
+    </div>
+    <div id="formularios-almacen" style="margin: 20px;"></div>
+    <div id="tablaResultados-almacen" class="tablaResultados"></div>
+</div>
+
+<!-- ========================= SECCION: REPORTES ========================= -->
+<div id="seccion-reportes" class="seccion">
+    <h3>Reportes</h3>
+    <div class="panel" id="panel-reportes">
+        <p class="placeholder">Próximamente</p>
+    </div>
+    <div id="formularios-reportes" style="margin: 20px;"></div>
+    <div id="tablaResultados-reportes" class="tablaResultados"></div>
+</div>
 
 <script>
-    const BASE_URL = "http://localhost:9585/api/articulos";
+    const BASE_URL_ARTICULOS = "http://localhost:9585/api/articulos";
 
+    // ======================================================================
+    // NAVEGACION: muestra la sección elegida y oculta el resto
+    // ======================================================================
+    function mostrarSeccion(nombre) {
+        $(".seccion").removeClass("activa");
+        $("#seccion-" + nombre).addClass("activa");
 
- // LISTAR PRODUCTOS
- function listarProductos() {
-     $.get(BASE_URL, function (data) {
-         mostrarTabla(data);
-     }).fail(() => Swal.fire("Error", "No se pudieron obtener los productos", "error"));
- }
+        $("nav a").removeClass("active");
+        $("nav a[data-seccion='" + nombre + "']").addClass("active");
+    }
 
- // BUSCAR POR ID
- function buscarProductoId() {
-     Swal.fire({
-         title: "Buscar producto",
-         input: "number",
-         inputLabel: "Ingrese el ID del producto",
-         showCancelButton: true,
-         confirmButtonText: "Buscar"
-     }).then(result => {
-         if (result.isConfirmed && result.value) {
-             $.get(BASE_URL + "/" + result.value, function (data) {
-                 mostrarTabla([data]);
-             }).fail(() => Swal.fire("Error", "Producto no encontrado", "error"));
-         }
-     });
- }
+    // Seccion inicial al cargar la pagina
+    $(document).ready(function () {
+        mostrarSeccion("productos");
+    });
 
- // FORMULARIO ACTUALIZAR
- function mostrarFormularioActualizar() {
-     $("#formularios").html(`
-         <h4>Actualizar Producto</h4>
-         <input type="number" id="updId" placeholder="ID del producto"><br>
-         <input type="text" id="updNombre" placeholder="Nuevo nombre"><br>
-         <input type="number" id="updPrecio" placeholder="Nuevo precio"><br>
-         <input type="number" id="updStock" placeholder="Nuevo stock"><br>
-         <button class="btn-green" onclick="actualizarProducto()">Actualizar</button>
-     `);
- }
+    // ======================================================================
+    // PRODUCTOS
+    // #tablaResultados -> #tablaResultados-productos
+    // para que no choquen con los de los otros modulos)
+    // ======================================================================
 
- // ACTUALIZAR PRODUCTO
- function actualizarProducto() {
-     const id = $("#updId").val();
-     const dto = {
-         nombre_articulo: $("#updNombre").val(),
-         precio: $("#updPrecio").val(),
-         stock: $("#updStock").val()
-     };
-     $.ajax({
-         url: BASE_URL + "/" + id,
-         method: "PUT",
-         contentType: "application/json",
-         data: JSON.stringify(dto),
-         success: data => {
-             Swal.fire("Éxito", "Producto actualizado correctamente", "success");
-             mostrarTabla([data]);
-         },
-         error: () => Swal.fire("Error", "No se pudo actualizar", "error")
-     });
- }
+    function listarProductos() {
+        $.get(BASE_URL_ARTICULOS, function (data) {
+            mostrarTablaProductos(data);
+        }).fail(() => Swal.fire("Error", "No se pudieron obtener los productos", "error"));
+    }
 
- // FORMULARIO ELIMINAR
- function mostrarFormularioEliminar() {
-     $("#formularios").html(`
-         <h4>Eliminar Producto</h4>
-         <input type="number" id="delId" placeholder="ID del producto"><br>
-         <button class="btn-gray" onclick="eliminarProducto()">Eliminar</button>
-     `);
- }
+    function buscarProductoId() {
+        Swal.fire({
+            title: "Buscar producto",
+            input: "number",
+            inputLabel: "Ingrese el ID del producto",
+            showCancelButton: true,
+            confirmButtonText: "Buscar"
+        }).then(result => {
+            if (result.isConfirmed && result.value) {
+                $.get(BASE_URL_ARTICULOS + "/" + result.value, function (data) {
+                    mostrarTablaProductos([data]);
+                }).fail(() => Swal.fire("Error", "Producto no encontrado", "error"));
+            }
+        });
+    }
 
- // ELIMINAR PRODUCTO
- function eliminarProducto() {
-     const id = $("#delId").val();
-     $.ajax({
-         url: BASE_URL + "/" + id,
-         method: "DELETE",
-         success: msg => Swal.fire("Éxito", msg, "success"),
-         error: () => Swal.fire("Error", "No se pudo eliminar el producto", "error")
-     });
- }
+    function mostrarFormularioActualizar() {
+        $("#formularios-productos").html(`
+            <h4>Actualizar Producto</h4>
+            <input type="number" id="updId" placeholder="ID del producto"><br>
+            <input type="text" id="updNombre" placeholder="Nuevo nombre"><br>
+            <input type="number" id="updPrecio" placeholder="Nuevo precio"><br>
+            <input type="number" id="updStock" placeholder="Nuevo stock"><br>
+            <button class="btn-green" onclick="actualizarProducto()">Actualizar</button>
+        `);
+    }
 
- // FORMULARIO INSERTAR
- function mostrarFormularioInsertar() {
-     $("#formularios").html(`
-         <h4>Insertar Nuevo Producto</h4>
-         <input type="text" id="insNombre" placeholder="Nombre del producto"><br>
-         <input type="number" id="insPrecio" placeholder="Precio"><br>
-         <input type="number" id="insStock" placeholder="Stock"><br>
-         <button class="btn-orange" onclick="insertarProducto()">Guardar</button>
-     `);
- }
+    function actualizarProducto() {
+        const id = $("#updId").val();
+        const dto = {
+            nombre_articulo: $("#updNombre").val(),
+            precio: $("#updPrecio").val(),
+            stock: $("#updStock").val()
+        };
+        $.ajax({
+            url: BASE_URL_ARTICULOS + "/" + id,
+            method: "PUT",
+            contentType: "application/json",
+            data: JSON.stringify(dto),
+            success: data => {
+                Swal.fire("Éxito", "Producto actualizado correctamente", "success");
+                mostrarTablaProductos([data]);
+            },
+            error: () => Swal.fire("Error", "No se pudo actualizar", "error")
+        });
+    }
 
- // INSERTAR PRODUCTO
- function insertarProducto() {
-     const dto = {
-         nombre_articulo: $("#insNombre").val(),
-         precio: $("#insPrecio").val(),
-         stock: $("#insStock").val()
-     };
-     $.ajax({
-         url: BASE_URL,
-         method: "POST",
-         contentType: "application/json",
-         data: JSON.stringify(dto),
-         success: data => {
-             Swal.fire("Éxito", "Producto agregado correctamente", "success");
-             mostrarTabla([data]);
-         },
-         error: () => Swal.fire("Error", "No se pudo insertar el producto", "error")
-     });
- }
+    function mostrarFormularioEliminar() {
+        $("#formularios-productos").html(`
+            <h4>Eliminar Producto</h4>
+            <input type="number" id="delId" placeholder="ID del producto"><br>
+            <button class="btn-gray" onclick="eliminarProducto()">Eliminar</button>
+        `);
+    }
 
- // MOSTRAR TABLA EN HTML
- function mostrarTabla(data) {
-     let html = `
-         <table border="1" cellpadding="5" cellspacing="0">
-             <tr>
-                 <th>ID</th>
-                 <th>Nombre</th>
-                 <th>Precio</th>
-                 <th>Existencia</th>
-             </tr>
-     `;
-     data.forEach(a => {
-         html += `
-             <tr>
-                 <td>${a.id}</td>
-                 <td>${a.nombre_articulo}</td>
-                 <td>${a.precio}</td>
-                 <td>${a.stock}</td>
-             </tr>
-         `;
-     });
-     html += "</table>";
-     $("#tablaResultados").html(html);
- }
+    function eliminarProducto() {
+        const id = $("#delId").val();
+        $.ajax({
+            url: BASE_URL_ARTICULOS + "/" + id,
+            method: "DELETE",
+            success: msg => Swal.fire("Éxito", msg, "success"),
+            error: () => Swal.fire("Error", "No se pudo eliminar el producto", "error")
+        });
+    }
+
+    function mostrarFormularioInsertar() {
+        $("#formularios-productos").html(`
+            <h4>Insertar Nuevo Producto</h4>
+            <input type="text" id="insNombre" placeholder="Nombre del producto"><br>
+            <input type="number" id="insPrecio" placeholder="Precio"><br>
+            <input type="number" id="insStock" placeholder="Stock"><br>
+            <button class="btn-orange" onclick="insertarProducto()">Guardar</button>
+        `);
+    }
+
+    function insertarProducto() {
+        const dto = {
+            nombre_articulo: $("#insNombre").val(),
+            precio: $("#insPrecio").val(),
+            stock: $("#insStock").val()
+        };
+        $.ajax({
+            url: BASE_URL_ARTICULOS,
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(dto),
+            success: data => {
+                Swal.fire("Éxito", "Producto agregado correctamente", "success");
+                mostrarTablaProductos([data]);
+            },
+            error: () => Swal.fire("Error", "No se pudo insertar el producto", "error")
+        });
+    }
+
+    function mostrarTablaProductos(data) {
+        let html = `
+            <table border="1" cellpadding="5" cellspacing="0">
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Precio</th>
+                    <th>Existencia</th>
+                </tr>
+        `;
+        data.forEach(a => {
+            html += `
+                <tr>
+                    <td>${a.id}</td>
+                    <td>${a.nombre_articulo}</td>
+                    <td>${a.precio}</td>
+                    <td>${a.stock}</td>
+                </tr>
+            `;
+        });
+        html += "</table>";
+        $("#tablaResultados-productos").html(html);
+    }
+
+    // ======================================================================
+    // PROVEEDORES
+    // ======================================================================
+    const BASE_URL_PROVEEDORES = "http://localhost:9585/api/proveedores";
+
+    // LISTAR PROVEEDORES
+    function listarProveedores() {
+        $.get(BASE_URL_PROVEEDORES, function (data) {
+            mostrarTablaProveedores(data);
+        }).fail(() => Swal.fire("Error", "No se pudieron obtener los proveedores", "error"));
+    }
+
+    // BUSCAR POR ID
+    function buscarProveedorId() {
+        Swal.fire({
+            title: "Buscar proveedor",
+            input: "number",
+            inputLabel: "Ingrese el ID del proveedor",
+            showCancelButton: true,
+            confirmButtonText: "Buscar"
+        }).then(result => {
+            if (result.isConfirmed && result.value) {
+                $.get(BASE_URL_PROVEEDORES + "/" + result.value, function (data) {
+                    mostrarTablaProveedores([data]);
+                }).fail(() => Swal.fire("Error", "Proveedor no encontrado", "error"));
+            }
+        });
+    }
+
+    // FORMULARIO INSERTAR
+    function mostrarFormularioInsertarProveedor() {
+        $("#formularios-proveedores").html(`
+            <h4>Insertar Nuevo Proveedor</h4>
+            <input type="text" id="provInsNombre" placeholder="Nombre"><br>
+            <input type="text" id="provInsCuit" placeholder="CUIT"><br>
+            <input type="text" id="provInsTelefono" placeholder="Teléfono"><br>
+            <input type="text" id="provInsEmail" placeholder="Email"><br>
+            <button class="btn-orange" onclick="insertarProveedor()">Guardar</button>
+        `);
+    }
+
+    // INSERTAR PROVEEDOR
+    function insertarProveedor() {
+        const dto = {
+            nombre: $("#provInsNombre").val(),
+            contacto: $("#provInsContacto").val(),
+            cuit: $("#provInsCuit").val(),
+            telefono: $("#provInsTelefono").val(),
+            email: $("#provInsEmail").val()
+        };
+        $.ajax({
+            url: BASE_URL_PROVEEDORES,
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(dto),
+            success: data => {
+                Swal.fire("Éxito", "Proveedor agregado correctamente", "success");
+                mostrarTablaProveedores([data]);
+            },
+            error: () => Swal.fire("Error", "No se pudo insertar el proveedor", "error")
+        });
+    }
+
+    // FORMULARIO ACTUALIZAR
+    function mostrarFormularioActualizarProveedor() {
+        $("#formularios-proveedores").html(`
+            <h4>Actualizar Proveedor</h4>
+            <input type="number" id="provUpdId" placeholder="ID del proveedor"><br>
+            <input type="text" id="provUpdNombre" placeholder="Nuevo nombre"><br>
+            <input type="text" id="provUpdCuit" placeholder="Nuevo CUIT"><br>
+            <input type="text" id="provUpdTelefono" placeholder="Nuevo teléfono"><br>
+            <input type="text" id="provUpdEmail" placeholder="Nuevo email"><br>
+            <button class="btn-green" onclick="actualizarProveedor()">Actualizar</button>
+        `);
+    }
+
+    // ACTUALIZAR PROVEEDOR
+    function actualizarProveedor() {
+        const id = $("#provUpdId").val();
+        const dto = {
+            nombre: $("#provUpdNombre").val(),
+            cuit: $("#provUpdCuit").val(),
+            telefono: $("#provUpdTelefono").val(),
+            email: $("#provUpdEmail").val()
+        };
+        $.ajax({
+            url: BASE_URL_PROVEEDORES + "/" + id,
+            method: "PUT",
+            contentType: "application/json",
+            data: JSON.stringify(dto),
+            success: data => {
+                Swal.fire("Éxito", "Proveedor actualizado correctamente", "success");
+                mostrarTablaProveedores([data]);
+            },
+            error: () => Swal.fire("Error", "No se pudo actualizar. Verificá el ID.", "error")
+        });
+    }
+
+    // FORMULARIO ELIMINAR
+    function mostrarFormularioEliminarProveedor() {
+        $("#formularios-proveedores").html(`
+            <h4>Eliminar Proveedor</h4>
+            <input type="number" id="provDelId" placeholder="ID del proveedor"><br>
+            <button class="btn-gray" onclick="eliminarProveedor()">Eliminar</button>
+        `);
+    }
+
+    // ELIMINAR PROVEEDOR
+    function eliminarProveedor() {
+        const id = $("#provDelId").val();
+        $.ajax({
+            url: BASE_URL_PROVEEDORES + "/" + id,
+            method: "DELETE",
+            success: () => {
+                Swal.fire("Éxito", "Proveedor eliminado correctamente", "success");
+                $("#tablaResultados-proveedores").html("");
+            },
+            error: () => Swal.fire("Error", "No se pudo eliminar. Verificá el ID.", "error")
+        });
+    }
+
+    // FORMULARIO ASOCIAR ARTICULOS
+    function mostrarFormularioAsociarArticulos() {
+        $("#formularios-proveedores").html(`
+            <h4>Asociar Artículos a Proveedor</h4>
+            <input type="number" id="asocProveedorId" placeholder="ID del proveedor"><br>
+            <input type="text" id="asocArticuloIds" placeholder="IDs de artículos separados por coma (ej: 3,4,5)"><br>
+            <button class="btn-blue" onclick="asociarArticulos()">Asociar</button>
+            <p style="color:#888; font-size: 13px;">
+                Atención: esto reemplaza la lista completa de artículos del proveedor,
+                no se van sumando a lo que ya tenía asociado.
+            </p>
+        `);
+    }
+
+    // ASOCIAR ARTICULOS
+    function asociarArticulos() {
+        const id = $("#asocProveedorId").val();
+        const idsTexto = $("#asocArticuloIds").val();
+
+        const articuloIds = idsTexto
+            .split(",")
+            .map(s => s.trim())
+            .filter(s => s.length > 0)
+            .map(s => parseInt(s, 10));
+
+        if (articuloIds.length === 0) {
+            Swal.fire("Error", "Ingresá al menos un ID de artículo", "error");
+            return;
+        }
+
+        $.ajax({
+            url: BASE_URL_PROVEEDORES + "/" + id + "/articulos",
+            method: "PUT",
+            contentType: "application/json",
+            data: JSON.stringify({ articuloIds: articuloIds }),
+            success: data => {
+                Swal.fire("Éxito", "Artículos asociados correctamente", "success");
+                mostrarTablaProveedores([data]);
+            },
+            error: () => Swal.fire("Error", "No se pudo asociar. Verificá los IDs.", "error")
+        });
+    }
+
+    // MOSTRAR TABLA DE PROVEEDORES
+    function mostrarTablaProveedores(data) {
+        let html = `
+            <table border="1" cellpadding="5" cellspacing="0">
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>CUIT</th>
+                    <th>Teléfono</th>
+                    <th>Email</th>
+                    <th>Artículos provistos</th>
+                </tr>
+        `;
+        data.forEach(p => {
+            const articulos = (p.articulosProvistos && p.articulosProvistos.length > 0)
+                ? p.articulosProvistos.join(", ")
+                : "-";
+            html += `
+                <tr>
+                    <td>${p.id}</td>
+                    <td>${p.nombre}</td>
+                    <td>${p.cuit || "-"}</td>
+                    <td>${p.telefono || "-"}</td>
+                    <td>${p.email || "-"}</td>
+                    <td>${articulos}</td>
+                </tr>
+            `;
+        });
+        html += "</table>";
+        $("#tablaResultados-proveedores").html(html);
+    }
 
 </script>
 

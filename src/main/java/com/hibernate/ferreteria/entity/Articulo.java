@@ -30,6 +30,8 @@ public class Articulo {
     private Double precio;
     @Column(name="stock")
     private int stock;
+    @Column(nullable = false)
+    private boolean activo = true;
 
     @Override
     public String toString() {

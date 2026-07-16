@@ -19,7 +19,7 @@ public class ArticuloService {
     private Repo_articulos repo;
 
     public List<ArticulosDTO> serv_consulta() {
-        return repo.findAll().stream().map(ArticuloMapper::toDTO)
+        return repo.findByActivoTrue().stream().map(ArticuloMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
@@ -55,13 +55,13 @@ public class ArticuloService {
     }
 
     public String serv_eliminarArticulo(Integer id) {
-        if (repo.existsById(id)) {
-            repo.deleteById(id);
-            return "Articulo eliminado correctamente";
-        }
-        else {
-            return "No se encontró el artículo: " + id;
-        }
+        return repo.findById(id)
+                .map(articulo -> {
+                    articulo.setActivo(false);
+                    repo.save(articulo);
+                    return "Artículo desactivado correctamente";
+                })
+                .orElse("No se encontró el artículo: " + id);
     }
 
 }
