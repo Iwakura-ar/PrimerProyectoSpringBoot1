@@ -66,4 +66,13 @@ public class ProveedorController {
         }
     }
 
+    @DeleteMapping("/{id}/articulos/{articuloId}")
+    public ResponseEntity<?> desasociarArticulo(@PathVariable Long id, @PathVariable Integer articuloId) {
+        try {
+            return ResponseEntity.ok(proveedorService.desasociarArticulo(id, articuloId));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
 }

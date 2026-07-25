@@ -62,6 +62,9 @@
         <button class="btn-green" onclick="mostrarFormularioActualizar()"><i class="fas fa-edit"></i> Actualizar Productos</button>
         <button class="btn-gray" onclick="mostrarFormularioEliminar()"><i class="fas fa-trash"></i> Eliminar Productos</button>
         <button class="btn-orange" onclick="mostrarFormularioInsertar()"><i class="fas fa-plus"></i> Insertar Productos</button>
+        <hr>
+        <button class="btn-gray" onclick="listarInactivos()"><i class="fas fa-box-open"></i> Ver Inactivos</button>
+        <button class="btn-green" onclick="mostrarFormularioReactivar()"><i class="fas fa-undo"></i> Reactivar Producto</button>
     </div>
 
     <div id="formularios-productos" style="margin: 20px;"></div>
@@ -80,6 +83,7 @@
         <button class="btn-orange" onclick="mostrarFormularioInsertarProveedor()"><i class="fas fa-plus"></i> Insertar Proveedor</button>
         <hr>
         <button class="btn-blue" onclick="mostrarFormularioAsociarArticulos()"><i class="fas fa-link"></i> Asociar Artículos</button>
+        <button class="btn-gray" onclick="mostrarFormularioDesasociarArticulo()"><i class="fas fa-unlink"></i> Quitar Artículo</button>
     </div>
     <div id="formularios-proveedores" style="margin: 20px;"></div>
     <div id="tablaResultados-proveedores" class="tablaResultados"></div>
@@ -247,6 +251,41 @@
                 mostrarTablaProductos([data]);
             },
             error: () => Swal.fire("Error", "No se pudo insertar el producto", "error")
+        });
+    }
+
+    // LISTAR INACTIVOS
+    function listarInactivos() {
+        $.get(BASE_URL_ARTICULOS + "/inactivos", function (data) {
+            if (data.length === 0) {
+                Swal.fire("Info", "No hay productos inactivos", "info");
+                $("#tablaResultados-productos").html("");
+                return;
+            }
+            mostrarTablaProductos(data);
+        }).fail(() => Swal.fire("Error", "No se pudieron obtener los productos inactivos", "error"));
+    }
+
+    // FORMULARIO REACTIVAR
+    function mostrarFormularioReactivar() {
+        $("#formularios-productos").html(`
+            <h4>Reactivar Producto</h4>
+            <input type="number" id="reactId" placeholder="ID del producto"><br>
+            <button class="btn-green" onclick="reactivarProducto()">Reactivar</button>
+        `);
+    }
+
+    // REACTIVAR PRODUCTO
+    function reactivarProducto() {
+        const id = $("#reactId").val();
+        $.ajax({
+            url: BASE_URL_ARTICULOS + "/" + id + "/activar",
+            method: "PUT",
+            success: msg => {
+                Swal.fire("Éxito", msg, "success");
+                $("#tablaResultados-productos").html("");
+            },
+            error: () => Swal.fire("Error", "No se pudo reactivar. Verificá el ID.", "error")
         });
     }
 
@@ -435,6 +474,32 @@
                 mostrarTablaProveedores([data]);
             },
             error: () => Swal.fire("Error", "No se pudo asociar. Verificá los IDs.", "error")
+        });
+    }
+
+    // FORMULARIO DESASOCIAR ARTICULO
+    function mostrarFormularioDesasociarArticulo() {
+        $("#formularios-proveedores").html(`
+            <h4>Quitar Artículo de Proveedor</h4>
+            <input type="number" id="desasocProveedorId" placeholder="ID del proveedor"><br>
+            <input type="number" id="desasocArticuloId" placeholder="ID del artículo a quitar"><br>
+            <button class="btn-gray" onclick="desasociarArticulo()">Quitar</button>
+        `);
+    }
+
+    // DESASOCIAR ARTICULO
+    function desasociarArticulo() {
+        const id = $("#desasocProveedorId").val();
+        const articuloId = $("#desasocArticuloId").val();
+
+        $.ajax({
+            url: BASE_URL_PROVEEDORES + "/" + id + "/articulos/" + articuloId,
+            method: "DELETE",
+            success: data => {
+                Swal.fire("Éxito", "Artículo desvinculado correctamente", "success");
+                mostrarTablaProveedores([data]);
+            },
+            error: () => Swal.fire("Error", "No se pudo quitar. Verificá que el artículo esté asociado a ese proveedor.", "error")
         });
     }
 

@@ -63,12 +63,27 @@ public class ProveedorService {
         Proveedor proveedor = repoProveedores.findById(proveedorId)
                 .orElseThrow(() -> new IllegalArgumentException("Proveedor no encontrado: " + proveedorId));
 
-        Set<Articulo> articulos = request.getArticuloIds().stream()
+        Set<Articulo> nuevosArticulos = request.getArticuloIds().stream()
                 .map(articuloId -> repoArticulos.findById(articuloId)
                         .orElseThrow(() -> new IllegalArgumentException("Articulo no encontrado: " + articuloId)))
                 .collect(Collectors.toSet());
 
-        proveedor.setArticulos(articulos);
+        proveedor.getArticulos().addAll(nuevosArticulos);
+
+        return aDto(repoProveedores.save(proveedor));
+    }
+
+    public ProveedorDTO desasociarArticulo(Long proveedorId, Integer articuloId) {
+        Proveedor proveedor = repoProveedores.findById(proveedorId)
+                .orElseThrow(() -> new IllegalArgumentException("Proveedor no encontrado: " + proveedorId));
+
+        boolean estaba = proveedor.getArticulos().removeIf(a -> a.getId() == articuloId);
+
+        if (!estaba) {
+            throw new IllegalArgumentException(
+                    "El artículo " + articuloId + " no estaba asociado a este proveedor");
+        }
+
         return aDto(repoProveedores.save(proveedor));
     }
 

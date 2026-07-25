@@ -40,4 +40,14 @@ public class ArticuloController {
         public String eliminar(@PathVariable Integer id) {
                 return servicio.serv_eliminarArticulo(id);
         }
+
+        @PutMapping("/{id}/activar")
+        public String reactivar(@PathVariable Integer id) {
+                return servicio.serv_reactivarArticulo(id);
+        }
+
+        @GetMapping("/inactivos")
+        public List<ArticulosDTO> listarInactivos() {
+                return servicio.serv_consultaInactivos();
+        }
 }

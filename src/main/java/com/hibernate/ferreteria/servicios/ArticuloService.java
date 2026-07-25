@@ -64,4 +64,18 @@ public class ArticuloService {
                 .orElse("No se encontró el artículo: " + id);
     }
 
+    public String serv_reactivarArticulo(Integer id) {
+        return repo.findById(id)
+                .map(articulo -> {
+                    articulo.setActivo(true);
+                    repo.save(articulo);
+                    return "Artículo reactivado correctamente";
+                })
+                .orElse("No se encontró el artículo: " + id);
+    }
+
+    public List<ArticulosDTO> serv_consultaInactivos() {
+        return repo.findByActivoFalse().stream().map(ArticuloMapper::toDTO)
+                .collect(Collectors.toList());
+    }
 }

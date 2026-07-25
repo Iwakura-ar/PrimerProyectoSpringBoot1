@@ -15,4 +15,6 @@ public interface Repo_articulos extends JpaRepository<Articulo, Integer> {
     List<Articulo> findByStockLessThan(Integer stock);
 
     List<Articulo> findByActivoTrue();
+
+    List<Articulo> findByActivoFalse();
 }
