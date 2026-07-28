@@ -58,6 +58,11 @@ public class VentaService {
 
         for (DetalleRequestDTO item : request.getItems()) {
 
+            if (item.getCantidad() == null || item.getCantidad() <= 0) {
+                throw new IllegalArgumentException(
+                        "La cantidad debe ser mayor a 0 (artículo " + item.getArticuloId() + ")");
+            }
+
             Articulo articulo = repoArticulos.findById(item.getArticuloId())
                     .orElseThrow(() -> new IllegalArgumentException(
                             "ERROR: Articulo no encontrado: " + item.getArticuloId()));

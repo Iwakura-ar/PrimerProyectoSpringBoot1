@@ -93,7 +93,10 @@
 <div id="seccion-ventas" class="seccion">
     <h3>Ventas</h3>
     <div class="panel" id="panel-ventas">
-        <p class="placeholder">Próximamente</p>
+        <button class="btn-blue" onclick="listarVentas()"><i class="fas fa-list"></i> Listar Ventas</button>
+        <button class="btn-blue" onclick="buscarVentaId()"><i class="fas fa-search"></i> Buscar Venta</button>
+        <hr>
+        <button class="btn-orange" onclick="mostrarFormularioNuevaVenta()"><i class="fas fa-cash-register"></i> Nueva Venta</button>
     </div>
     <div id="formularios-ventas" style="margin: 20px;"></div>
     <div id="tablaResultados-ventas" class="tablaResultados"></div>
@@ -131,6 +134,35 @@
 
 <script>
     const BASE_URL_ARTICULOS = "http://localhost:9585/api/articulos";
+
+    // ======================================================================
+    // VALIDACIONES REUTILIZABLES
+    // ======================================================================
+
+    // Entero positivo: solo digitos, sin signo, sin decimales, mayor a 0
+    function esEnteroPositivo(valor) {
+        return /^\d+$/.test(valor) && parseInt(valor, 10) > 0;
+    }
+
+    // Numero positivo, permite decimales (para precio)
+    function esNumeroPositivo(valor) {
+        return /^\d+(\.\d+)?$/.test(valor) && parseFloat(valor) > 0;
+    }
+
+    // CUIT: exactamente 11 digitos, sin guiones
+    function esCuitValido(cuit) {
+        return /^\d{11}$/.test(cuit);
+    }
+
+    // Telefono: solo digitos (sin espacios, guiones ni letras)
+    function esTelefonoValido(telefono) {
+        return /^\d+$/.test(telefono);
+    }
+
+    // Email: chequeo minimo, al menos un arroba
+    function esEmailValido(email) {
+        return email.includes("@");
+    }
 
     // ======================================================================
     // NAVEGACION: muestra la sección elegida y oculta el resto
@@ -189,6 +221,18 @@
 
     function actualizarProducto() {
         const id = $("#updId").val();
+        const precio = $("#updPrecio").val();
+        const stock = $("#updStock").val();
+
+        if (!esNumeroPositivo(precio)) {
+            Swal.fire("Error", "El precio debe ser un número positivo", "error");
+            return;
+        }
+        if (!esEnteroPositivo(stock)) {
+            Swal.fire("Error", "El stock debe ser un número entero positivo", "error");
+            return;
+        }
+
         const dto = {
             nombre_articulo: $("#updNombre").val(),
             precio: $("#updPrecio").val(),
@@ -236,6 +280,14 @@
     }
 
     function insertarProducto() {
+        const precio = $("#insPrecio").val();
+        const stock = $("#insStock").val();
+
+        if (!esEnteroPositivo(precio) || !esEnteroPositivo(stock)) {
+            Swal.fire("Error", "Precio y stock deben ser números enteros positivos", "error");
+            return;
+        }
+
         const dto = {
             nombre_articulo: $("#insNombre").val(),
             precio: $("#insPrecio").val(),
@@ -355,7 +407,35 @@
     }
 
     // INSERTAR PROVEEDOR
+    // Valida cuit/telefono/email de un proveedor. Devuelve un mensaje de error
+    // (string) si algo esta mal, o null si todo esta OK. Los tres campos son
+    // opcionales: si vienen vacios no se validan, pero si vienen cargados
+    // tienen que respetar el formato.
+    function validarDatosProveedor(cuit, telefono, email) {
+        if (cuit && !esCuitValido(cuit)) {
+            return "El CUIT debe tener exactamente 11 números, sin guiones";
+        }
+        if (telefono && !esTelefonoValido(telefono)) {
+            return "El teléfono solo puede contener números";
+        }
+        if (email && !esEmailValido(email)) {
+            return "El email debe contener al menos un @";
+        }
+        return null;
+    }
+
+    // INSERTAR PROVEEDOR
     function insertarProveedor() {
+        const cuit = $("#provInsCuit").val();
+        const telefono = $("#provInsTelefono").val();
+        const email = $("#provInsEmail").val();
+
+        const error = validarDatosProveedor(cuit, telefono, email);
+        if (error) {
+            Swal.fire("Error", error, "error");
+            return;
+        }
+
         const dto = {
             nombre: $("#provInsNombre").val(),
             contacto: $("#provInsContacto").val(),
@@ -392,6 +472,16 @@
     // ACTUALIZAR PROVEEDOR
     function actualizarProveedor() {
         const id = $("#provUpdId").val();
+        const cuit = $("#provUpdCuit").val();
+        const telefono = $("#provUpdTelefono").val();
+        const email = $("#provUpdEmail").val();
+
+        const error = validarDatosProveedor(cuit, telefono, email);
+        if (error) {
+            Swal.fire("Error", error, "error");
+            return;
+        }
+
         const dto = {
             nombre: $("#provUpdNombre").val(),
             cuit: $("#provUpdCuit").val(),
@@ -534,6 +624,200 @@
         html += "</table>";
         $("#tablaResultados-proveedores").html(html);
     }
+
+    // ======================================================================
+    // VENTAS
+    // ======================================================================
+    const BASE_URL_VENTAS = "http://localhost:9585/api/ventas";
+    let contadorItemsVenta = 0;
+
+    // LISTAR VENTAS
+    function listarVentas() {
+        $.get(BASE_URL_VENTAS, function (data) {
+            mostrarTablaVentas(data);
+        }).fail(() => Swal.fire("Error", "No se pudieron obtener las ventas", "error"));
+    }
+
+    // BUSCAR VENTA POR ID
+    function buscarVentaId() {
+        Swal.fire({
+            title: "Buscar venta",
+            input: "number",
+            inputLabel: "Ingrese el ID de la venta",
+            showCancelButton: true,
+            confirmButtonText: "Buscar"
+        }).then(result => {
+            if (result.isConfirmed && result.value) {
+                $.get(BASE_URL_VENTAS + "/" + result.value, function (data) {
+                    mostrarDetalleVenta(data);
+                }).fail(() => Swal.fire("Error", "Venta no encontrada", "error"));
+            }
+        });
+    }
+
+    // FORMULARIO NUEVA VENTA (dinamico: se van agregando filas de articulo+cantidad)
+    function mostrarFormularioNuevaVenta() {
+        contadorItemsVenta = 0;
+        $("#formularios-ventas").html(`
+            <h4>Nueva Venta</h4>
+            <input type="number" id="ventaUsuarioId" placeholder="ID del usuario"><br>
+            <div id="itemsVenta"></div>
+            <button class="btn-blue" type="button" onclick="agregarItemVenta()">
+                <i class="fas fa-plus"></i> Agregar Artículo
+            </button>
+            <br><br>
+            <button class="btn-orange" type="button" onclick="confirmarVenta()">
+                <i class="fas fa-check"></i> Confirmar Venta
+            </button>
+        `);
+        agregarItemVenta(); // arranca con una fila lista para completar
+    }
+
+    // AGREGA UNA FILA DE ARTICULO+CANTIDAD AL FORMULARIO DE VENTA
+    function agregarItemVenta() {
+        const idx = contadorItemsVenta++;
+        $("#itemsVenta").append(`
+            <div class="item-venta" data-idx="${idx}" style="margin: 5px 0;">
+                <input type="number" class="itemArticuloId" placeholder="ID artículo">
+                <input type="number" class="itemCantidad" placeholder="Cantidad">
+                <button class="btn-gray" type="button" onclick="quitarItemVenta(${idx})">Quitar</button>
+            </div>
+        `);
+    }
+
+    // QUITA UNA FILA PUNTUAL DEL FORMULARIO DE VENTA
+    function quitarItemVenta(idx) {
+        $(".item-venta[data-idx='" + idx + "']").remove();
+    }
+
+    // ARMA EL JSON A PARTIR DE TODAS LAS FILAS Y CONFIRMA LA VENTA
+    function confirmarVenta() {
+        const usuarioId = $("#ventaUsuarioId").val();
+        const items = [];
+        let hayCantidadInvalida = false;
+
+        $(".item-venta").each(function () {
+            const articuloId = $(this).find(".itemArticuloId").val();
+            const cantidad = $(this).find(".itemCantidad").val();
+
+            if (articuloId && cantidad) {
+                if (!esEnteroPositivo(cantidad)) {
+                    hayCantidadInvalida = true;
+                    return; // sigue el .each, pero ya se marco el error
+                }
+                items.push({
+                    articuloId: parseInt(articuloId, 10),
+                    cantidad: parseInt(cantidad, 10)
+                });
+            }
+        });
+
+        if (hayCantidadInvalida) {
+            Swal.fire("Error", "La cantidad de cada artículo debe ser un número entero mayor a 0", "error");
+            return;
+        }
+
+        if (!usuarioId || items.length === 0) {
+            Swal.fire("Error", "Ingresá el usuario y al menos un artículo con cantidad", "error");
+            return;
+        }
+
+        const dto = {
+            usuarioId: parseInt(usuarioId, 10),
+            items: items
+        };
+
+        $.ajax({
+            url: BASE_URL_VENTAS,
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(dto),
+            success: data => {
+                Swal.fire("Éxito", "Venta registrada. Total: $" + data.total, "success");
+                $("#formularios-ventas").html("");
+                mostrarDetalleVenta(data);
+            },
+            error: (xhr) => {
+                // El backend devuelve 409 (stock insuficiente) o 400 (datos invalidos)
+                // con el mensaje de error en el body como texto plano
+                const msg = xhr.responseText || "No se pudo registrar la venta";
+                Swal.fire("Error", msg, "error");
+            }
+        });
+    }
+
+    // TABLA GENERAL DE VENTAS (listado)
+    function mostrarTablaVentas(data) {
+        let html = `
+            <table border="1" cellpadding="5" cellspacing="0">
+                <tr>
+                    <th>ID</th>
+                    <th>Fecha</th>
+                    <th>Usuario</th>
+                    <th>Total</th>
+                    <th>Detalle</th>
+                </tr>
+        `;
+        data.forEach(v => {
+            const usuarioNombre = v.usuario ? v.usuario.usuario : "-";
+            html += `
+                <tr>
+                    <td>${v.id}</td>
+                    <td>${v.fecha}</td>
+                    <td>${usuarioNombre}</td>
+                    <td>$${v.total}</td>
+                    <td><button class="btn-blue" onclick="verDetalleVentaPorId(${v.id})">Ver</button></td>
+                </tr>
+            `;
+        });
+        html += "</table>";
+        $("#tablaResultados-ventas").html(html);
+    }
+
+    // Trae una venta puntual y muestra su detalle (usado desde el boton "Ver" de la tabla)
+    function verDetalleVentaPorId(id) {
+        $.get(BASE_URL_VENTAS + "/" + id, function (data) {
+            mostrarDetalleVenta(data);
+        }).fail(() => Swal.fire("Error", "No se pudo obtener el detalle de la venta", "error"));
+    }
+
+    // DETALLE DE UNA VENTA PUNTUAL (cabecera + items)
+    function mostrarDetalleVenta(venta) {
+        const usuarioNombre = venta.usuario ? venta.usuario.usuario : "-";
+        let html = `
+            <h4>Venta #${venta.id}</h4>
+            <p>
+                <strong>Fecha:</strong> ${venta.fecha} &nbsp;&nbsp;
+                <strong>Usuario:</strong> ${usuarioNombre} &nbsp;&nbsp;
+                <strong>Total:</strong> $${venta.total}
+            </p>
+            <table border="1" cellpadding="5" cellspacing="0">
+                <tr>
+                    <th>Artículo</th>
+                    <th>Cantidad</th>
+                    <th>Precio unitario</th>
+                    <th>Subtotal</th>
+                </tr>
+        `;
+        venta.detalles.forEach(d => {
+            const nombreArticulo = d.articulo ? d.articulo.nombre_articulo : "-";
+            html += `
+                <tr>
+                    <td>${nombreArticulo}</td>
+                    <td>${d.cantidad}</td>
+                    <td>$${d.precioUnitario}</td>
+                    <td>$${d.subtotal}</td>
+                </tr>
+            `;
+        });
+        html += "</table>";
+        $("#tablaResultados-ventas").html(html);
+    }
+
+    // ======================================================================
+    // USUARIOS / ALMACEN / REPORTES
+    // Placeholder por ahora - se completan modulo por modulo en los proximos pasos.
+    // ======================================================================
 
 </script>
 

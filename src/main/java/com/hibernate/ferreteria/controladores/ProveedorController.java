@@ -20,7 +20,11 @@ public class ProveedorController {
 
     @PostMapping
     public ResponseEntity<?> crear(@RequestBody ProveedorRequestDTO request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(proveedorService.crear(request));
+        try {
+            return ResponseEntity.status(HttpStatus.CREATED).body(proveedorService.crear(request));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @GetMapping
@@ -41,6 +45,8 @@ public class ProveedorController {
     public ResponseEntity<?> actualizar(@PathVariable Long id, @RequestBody ProveedorRequestDTO request) {
         try {
             return ResponseEntity.ok(proveedorService.actualizar(id, request));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
         }

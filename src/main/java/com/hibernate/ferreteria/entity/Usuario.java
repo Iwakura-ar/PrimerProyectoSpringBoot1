@@ -1,5 +1,6 @@
 package com.hibernate.ferreteria.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 @Entity
@@ -16,6 +17,7 @@ public class Usuario {
     private String rol;
 
     @Column(nullable = false, unique = true, length = 60)
+    @JsonIgnore
     private String password;
 
     public Long getId() {

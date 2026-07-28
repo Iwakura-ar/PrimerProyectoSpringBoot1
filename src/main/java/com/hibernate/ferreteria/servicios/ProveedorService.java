@@ -24,6 +24,7 @@ public class ProveedorService {
     private Repo_articulos repoArticulos;
 
     public ProveedorDTO crear(ProveedorRequestDTO request) {
+        validarFormato(request);
         Proveedor proveedor = new Proveedor();
         aplicarDatos(proveedor, request);
         return aDto(repoProveedores.save(proveedor));
@@ -42,6 +43,7 @@ public class ProveedorService {
     }
 
     public ProveedorDTO actualizar(Long id, ProveedorRequestDTO request) {
+        validarFormato(request);
         Proveedor proveedor = repoProveedores.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Proveedor no encontrado: " + id));
         aplicarDatos(proveedor, request);
@@ -107,6 +109,21 @@ public class ProveedorService {
                 proveedor.getEmail(),
                 nombresArticulos
         );
+    }
+
+    private void validarFormato(ProveedorRequestDTO request) {
+        if (request.getCuit() != null && !request.getCuit().isBlank()
+                && !request.getCuit().matches("\\d{11}")) {
+            throw new IllegalStateException("El CUIT debe tener exactamente 11 números");
+        }
+        if (request.getTelefono() != null && !request.getTelefono().isBlank()
+                && !request.getTelefono().matches("\\d+")) {
+            throw new IllegalStateException("El teléfono solo puede contener números");
+        }
+        if (request.getEmail() != null && !request.getEmail().isBlank()
+                && !request.getEmail().contains("@")) {
+            throw new IllegalStateException("El email debe contener al menos un @");
+        }
     }
 
 }

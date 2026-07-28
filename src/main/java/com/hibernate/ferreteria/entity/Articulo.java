@@ -1,5 +1,6 @@
 package com.hibernate.ferreteria.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -41,5 +42,6 @@ public class Articulo {
     //Con lombok nos evitamos los getters, setters y constructores para esta clase
 
     @ManyToMany(mappedBy = "articulos")
+    @JsonIgnore
     private Set<Proveedor> proveedores = new HashSet<>();
 }

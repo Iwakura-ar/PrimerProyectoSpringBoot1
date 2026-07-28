@@ -3,6 +3,8 @@ package com.hibernate.ferreteria.controladores;
 import com.hibernate.ferreteria.DTOs.ArticulosDTO;
 import com.hibernate.ferreteria.servicios.ArticuloService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,14 +28,24 @@ public class ArticuloController {
         }
 
         @PostMapping
-        public ArticulosDTO insertarArticulo(@RequestBody ArticulosDTO dto) {
-                return servicio.serv_insertarArticulo(dto);
+        public ResponseEntity<?> insertarArticulo(@RequestBody ArticulosDTO dto) {
+                try {
+                        return ResponseEntity.status(HttpStatus.CREATED).body(servicio.serv_insertarArticulo(dto));
+                } catch (IllegalArgumentException e) {
+                        return ResponseEntity.badRequest().body(e.getMessage());
+                }
         }
 
         @PutMapping("/{id}")
-        public ArticulosDTO actualizar(@PathVariable Integer id,
+        public ResponseEntity<?> actualizar(@PathVariable Integer id,
                                        @RequestBody ArticulosDTO dto) {
-                return servicio.serv_actualizar(id, dto);
+                try {
+                        return ResponseEntity.ok(servicio.serv_actualizar(id, dto));
+                } catch (IllegalArgumentException e) {
+                        return ResponseEntity.badRequest().body(e.getMessage());
+                } catch (RuntimeException e) {
+                        return ResponseEntity.notFound().build();
+                }
         }
 
         @DeleteMapping("/{id}")

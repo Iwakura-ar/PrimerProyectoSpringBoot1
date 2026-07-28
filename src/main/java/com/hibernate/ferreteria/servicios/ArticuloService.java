@@ -30,12 +30,14 @@ public class ArticuloService {
     }
 
     public ArticulosDTO serv_insertarArticulo(ArticulosDTO dto) {
+        validarDatosArticulo(dto);
         Articulo articulo = ArticuloMapper.toEntity(dto);
         Articulo insertado = repo.save(articulo);
         return ArticuloMapper.toDTO(insertado);
     }
 
     public ArticulosDTO serv_actualizar(Integer id, ArticulosDTO dto) {
+        validarDatosArticulo(dto);
         Optional<Articulo> existe = repo.findById(id);
 
         if(existe.isPresent()) {
@@ -77,5 +79,14 @@ public class ArticuloService {
     public List<ArticulosDTO> serv_consultaInactivos() {
         return repo.findByActivoFalse().stream().map(ArticuloMapper::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    private void validarDatosArticulo(ArticulosDTO dto) {
+        if (dto.getPrecio() <= 0) {
+            throw new IllegalArgumentException("El precio debe ser mayor a 0");
+        }
+        if (dto.getStock() < 0) {
+            throw new IllegalArgumentException("El stock no puede ser negativo");
+        }
     }
 }

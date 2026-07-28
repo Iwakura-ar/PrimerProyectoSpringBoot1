@@ -1,5 +1,6 @@
 package com.hibernate.ferreteria.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
         import java.math.BigDecimal;
 
@@ -13,6 +14,7 @@ public class DetalleVenta {
 
     @ManyToOne
     @JoinColumn(name = "venta_id", nullable = false)
+    @JsonIgnore
     private Venta venta;
 
     @ManyToOne
