@@ -181,6 +181,38 @@
     });
 
     // ======================================================================
+    // USUARIO ACTUAL (rol logueado) - determina que se ve en el nav
+    // ======================================================================
+    let usuarioActual = null; // { autenticado, usuario, rol }
+
+    function cargarUsuarioActual(callback) {
+        $.get("http://localhost:9585/api/auth/me", function (data) {
+            usuarioActual = data;
+
+            // La pestaña Usuarios solo se muestra si el rol es ADMIN
+            if (!data.autenticado || data.rol !== "ADMIN") {
+                $("nav a[data-seccion='usuarios']").hide();
+            } else {
+                $("nav a[data-seccion='usuarios']").show();
+            }
+
+            if (callback) callback();
+        }).fail(() => {
+            // Si /api/auth/me todavia no esta disponible o falla,
+            // se oculta Usuarios por precaucion en vez de mostrarla de mas
+            $("nav a[data-seccion='usuarios']").hide();
+            if (callback) callback();
+        });
+    }
+
+    // Seccion inicial al cargar la pagina
+    $(document).ready(function () {
+        cargarUsuarioActual(function () {
+            mostrarSeccion("productos");
+        });
+    });
+
+    // ======================================================================
     // PRODUCTOS
     // #tablaResultados -> #tablaResultados-productos
     // para que no choquen con los de los otros modulos)
