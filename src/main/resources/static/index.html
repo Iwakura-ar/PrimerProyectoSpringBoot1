@@ -106,7 +106,11 @@
 <div id="seccion-usuarios" class="seccion">
     <h3>Usuarios</h3>
     <div class="panel" id="panel-usuarios">
-        <p class="placeholder">Próximamente</p>
+        <button class="btn-blue" onclick="listarUsuarios()"><i class="fas fa-users"></i> Listar Usuarios</button>
+        <hr>
+        <button class="btn-orange" onclick="mostrarFormularioCrearUsuario()"><i class="fas fa-user-plus"></i> Crear Usuario</button>
+        <button class="btn-green" onclick="mostrarFormularioCambiarRol()"><i class="fas fa-user-shield"></i> Cambiar Rol</button>
+        <button class="btn-gray" onclick="mostrarFormularioDesactivarUsuario()"><i class="fas fa-user-slash"></i> Desactivar Usuario</button>
     </div>
     <div id="formularios-usuarios" style="margin: 20px;"></div>
     <div id="tablaResultados-usuarios" class="tablaResultados"></div>
@@ -847,7 +851,146 @@
     }
 
     // ======================================================================
-    // USUARIOS / ALMACEN / REPORTES
+    // USUARIOS (solo Admin - el backend rechaza esto igual si alguien
+    // fuerza el acceso sin el rol correcto)
+    // ======================================================================
+    const BASE_URL_USUARIOS = "http://localhost:9585/api/usuarios";
+
+    // LISTAR USUARIOS
+    function listarUsuarios() {
+        $.get(BASE_URL_USUARIOS, function (data) {
+            mostrarTablaUsuarios(data);
+        }).fail(() => Swal.fire("Error", "No se pudieron obtener los usuarios", "error"));
+    }
+
+    // FORMULARIO CREAR USUARIO
+    function mostrarFormularioCrearUsuario() {
+        $("#formularios-usuarios").html(`
+            <h4>Crear Usuario</h4>
+            <input type="text" id="usrNuevoUsuario" placeholder="Nombre de usuario"><br>
+            <input type="password" id="usrNuevoPassword" placeholder="Contraseña"><br>
+            <select id="usrNuevoRol">
+                <option value="USER">USER</option>
+                <option value="ADMIN">ADMIN</option>
+            </select><br>
+            <button class="btn-orange" onclick="crearUsuario()">Crear</button>
+        `);
+    }
+
+    // CREAR USUARIO
+    function crearUsuario() {
+        const dto = {
+            usuario: $("#usrNuevoUsuario").val(),
+            password: $("#usrNuevoPassword").val(),
+            rol: $("#usrNuevoRol").val()
+        };
+
+        if (!dto.usuario || !dto.password) {
+            Swal.fire("Error", "Usuario y contraseña son obligatorios", "error");
+            return;
+        }
+
+        $.ajax({
+            url: BASE_URL_USUARIOS,
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(dto),
+            success: data => {
+                Swal.fire("Éxito", "Usuario creado correctamente", "success");
+                mostrarTablaUsuarios([data]);
+            },
+            error: (xhr) => {
+                const msg = xhr.responseText || "No se pudo crear el usuario";
+                Swal.fire("Error", msg, "error");
+            }
+        });
+    }
+
+    // FORMULARIO CAMBIAR ROL
+    function mostrarFormularioCambiarRol() {
+        $("#formularios-usuarios").html(`
+            <h4>Cambiar Rol de Usuario</h4>
+            <input type="number" id="usrRolId" placeholder="ID del usuario"><br>
+            <select id="usrNuevoRolCambio">
+                <option value="USER">USER</option>
+                <option value="ADMIN">ADMIN</option>
+            </select><br>
+            <button class="btn-green" onclick="cambiarRolUsuario()">Cambiar Rol</button>
+        `);
+    }
+
+    // CAMBIAR ROL
+    function cambiarRolUsuario() {
+        const id = $("#usrRolId").val();
+        const dto = { rol: $("#usrNuevoRolCambio").val() };
+
+        $.ajax({
+            url: BASE_URL_USUARIOS + "/" + id + "/rol",
+            method: "PUT",
+            contentType: "application/json",
+            data: JSON.stringify(dto),
+            success: data => {
+                Swal.fire("Éxito", "Rol actualizado correctamente", "success");
+                mostrarTablaUsuarios([data]);
+            },
+            error: (xhr) => {
+                const msg = xhr.responseText || "No se pudo cambiar el rol. Verificá el ID.";
+                Swal.fire("Error", msg, "error");
+            }
+        });
+    }
+
+    // FORMULARIO DESACTIVAR USUARIO
+    function mostrarFormularioDesactivarUsuario() {
+        $("#formularios-usuarios").html(`
+            <h4>Desactivar Usuario</h4>
+            <input type="number" id="usrDesactivarId" placeholder="ID del usuario"><br>
+            <button class="btn-gray" onclick="desactivarUsuario()">Desactivar</button>
+        `);
+    }
+
+    // DESACTIVAR USUARIO
+    function desactivarUsuario() {
+        const id = $("#usrDesactivarId").val();
+        $.ajax({
+            url: BASE_URL_USUARIOS + "/" + id,
+            method: "DELETE",
+            success: msg => {
+                Swal.fire("Éxito", msg, "success");
+                $("#tablaResultados-usuarios").html("");
+            },
+            error: () => Swal.fire("Error", "No se pudo desactivar. Verificá el ID.", "error")
+        });
+    }
+
+    // MOSTRAR TABLA DE USUARIOS
+    function mostrarTablaUsuarios(data) {
+        let html = `
+            <table border="1" cellpadding="5" cellspacing="0">
+                <tr>
+                    <th>ID</th>
+                    <th>Usuario</th>
+                    <th>Rol</th>
+                    <th>Activo</th>
+                </tr>
+        `;
+        data.forEach(u => {
+            html += `
+                <tr>
+                    <td>${u.id}</td>
+                    <td>${u.usuario}</td>
+                    <td>${u.rol}</td>
+                    <td>${u.activo ? "Sí" : "No"}</td>
+                </tr>
+            `;
+        });
+        html += "</table>";
+        $("#tablaResultados-usuarios").html(html);
+    }
+
+
+    // ======================================================================
+    // ALMACEN / REPORTES
     // Placeholder por ahora - se completan modulo por modulo en los proximos pasos.
     // ======================================================================
 

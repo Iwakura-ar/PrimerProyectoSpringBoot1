@@ -20,6 +20,9 @@ public class Usuario {
     @JsonIgnore
     private String password;
 
+    @Column(nullable = false)
+    private boolean activo = true;
+
     public Long getId() {
         return id;
     }
@@ -51,4 +54,8 @@ public class Usuario {
     public void setPassword(String password) {
         this.password = password;
     }
+
+    public boolean isActivo() { return activo; }
+
+    public void setActivo(boolean activo) { this.activo = activo; }
 }

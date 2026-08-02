@@ -1,4 +1,5 @@
 package com.hibernate.ferreteria.seguridad;
+
 import com.hibernate.ferreteria.servicios.UsuarioService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,11 +23,6 @@ public class SecurityConfig {
     }
 
     @Bean
-    public PasswordEncoder codificaPass(){
-        return new BCryptPasswordEncoder();
-    }
-
-    @Bean
     public AuthenticationManager autenticacion(AuthenticationConfiguration authConfig)
             throws Exception{
         return authConfig.getAuthenticationManager();
@@ -39,8 +35,8 @@ public class SecurityConfig {
                 csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/articulo/**")
-                        .hasAnyRole("ADMIN", "USER")
+                        .requestMatchers("/api/articulo/**").hasAnyRole("ADMIN", "USER")
+                        .requestMatchers("/api/usuarios/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .authenticationManager(authManger)
