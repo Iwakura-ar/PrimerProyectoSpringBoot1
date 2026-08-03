@@ -120,7 +120,11 @@
 <div id="seccion-almacen" class="seccion">
     <h3>Almacén</h3>
     <div class="panel" id="panel-almacen">
-        <p class="placeholder">Próximamente</p>
+        <button class="btn-orange" onclick="mostrarFormularioEntrada()"><i class="fas fa-arrow-down"></i> Registrar Entrada</button>
+        <button class="btn-gray" onclick="mostrarFormularioSalida()"><i class="fas fa-arrow-up"></i> Registrar Salida</button>
+        <hr>
+        <button class="btn-blue" onclick="mostrarFormularioHistorial()"><i class="fas fa-history"></i> Ver Historial</button>
+        <button class="btn-blue" onclick="verStockBajo()"><i class="fas fa-exclamation-triangle"></i> Ver Stock Bajo</button>
     </div>
     <div id="formularios-almacen" style="margin: 20px;"></div>
     <div id="tablaResultados-almacen" class="tablaResultados"></div>
@@ -988,10 +992,191 @@
         $("#tablaResultados-usuarios").html(html);
     }
 
+    // ======================================================================
+    // ALMACEN
+    // ======================================================================
+    const BASE_URL_ALMACEN = "http://localhost:9585/api/almacen";
+    const UMBRAL_STOCK_BAJO = 15;
+
+    // FORMULARIO REGISTRAR ENTRADA
+    function mostrarFormularioEntrada() {
+        $("#formularios-almacen").html(`
+            <h4>Registrar Entrada de Mercadería</h4>
+            <input type="number" id="entArticuloId" placeholder="ID del artículo"><br>
+            <input type="number" id="entCantidad" placeholder="Cantidad"><br>
+            <input type="text" id="entMotivo" placeholder="Motivo (ej: Pedido a proveedor X)"><br>
+            <input type="number" id="entUsuarioId" placeholder="ID del usuario (opcional)"><br>
+            <button class="btn-orange" onclick="registrarEntrada()">Registrar Entrada</button>
+        `);
+    }
+
+    // REGISTRAR ENTRADA
+    function registrarEntrada() {
+        const articuloId = $("#entArticuloId").val();
+        const cantidad = $("#entCantidad").val();
+
+        if (!esEnteroPositivo(articuloId) || !esEnteroPositivo(cantidad)) {
+            Swal.fire("Error", "Artículo y cantidad deben ser números enteros positivos", "error");
+            return;
+        }
+
+        const dto = {
+            articuloId: parseInt(articuloId, 10),
+            cantidad: parseInt(cantidad, 10),
+            motivo: $("#entMotivo").val(),
+            usuarioId: $("#entUsuarioId").val() ? parseInt($("#entUsuarioId").val(), 10) : null
+        };
+
+        $.ajax({
+            url: BASE_URL_ALMACEN + "/entradas",
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(dto),
+            success: data => {
+                Swal.fire("Éxito", "Entrada registrada. Stock actual: " + data.stockResultante, "success");
+                mostrarTablaMovimientos([data]);
+            },
+            error: (xhr) => {
+                const msg = xhr.responseText || "No se pudo registrar la entrada";
+                Swal.fire("Error", msg, "error");
+            }
+        });
+    }
+
+    // FORMULARIO REGISTRAR SALIDA
+    function mostrarFormularioSalida() {
+        $("#formularios-almacen").html(`
+            <h4>Registrar Salida Manual</h4>
+            <input type="number" id="salArticuloId" placeholder="ID del artículo"><br>
+            <input type="number" id="salCantidad" placeholder="Cantidad"><br>
+            <input type="text" id="salMotivo" placeholder="Motivo (ej: Rotura en depósito)"><br>
+            <input type="number" id="salUsuarioId" placeholder="ID del usuario (opcional)"><br>
+            <button class="btn-gray" onclick="registrarSalida()">Registrar Salida</button>
+        `);
+    }
+
+    // REGISTRAR SALIDA
+    function registrarSalida() {
+        const articuloId = $("#salArticuloId").val();
+        const cantidad = $("#salCantidad").val();
+
+        if (!esEnteroPositivo(articuloId) || !esEnteroPositivo(cantidad)) {
+            Swal.fire("Error", "Artículo y cantidad deben ser números enteros positivos", "error");
+            return;
+        }
+
+        const dto = {
+            articuloId: parseInt(articuloId, 10),
+            cantidad: parseInt(cantidad, 10),
+            motivo: $("#salMotivo").val(),
+            usuarioId: $("#salUsuarioId").val() ? parseInt($("#salUsuarioId").val(), 10) : null
+        };
+
+        $.ajax({
+            url: BASE_URL_ALMACEN + "/salidas",
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(dto),
+            success: data => {
+                Swal.fire("Éxito", "Salida registrada. Stock actual: " + data.stockResultante, "success");
+                mostrarTablaMovimientos([data]);
+            },
+            error: (xhr) => {
+                // El backend devuelve 409 si no hay stock suficiente
+                const msg = xhr.responseText || "No se pudo registrar la salida";
+                Swal.fire("Error", msg, "error");
+            }
+        });
+    }
+
+    // FORMULARIO VER HISTORIAL
+    function mostrarFormularioHistorial() {
+        $("#formularios-almacen").html(`
+            <h4>Historial de Movimientos</h4>
+            <input type="number" id="histArticuloId" placeholder="ID del artículo"><br>
+            <button class="btn-blue" onclick="verHistorial()">Ver Historial</button>
+        `);
+    }
+
+    // VER HISTORIAL DE UN ARTICULO
+    function verHistorial() {
+        const articuloId = $("#histArticuloId").val();
+        $.get(BASE_URL_ALMACEN + "/articulo/" + articuloId, function (data) {
+            if (data.length === 0) {
+                Swal.fire("Info", "Este artículo no tiene movimientos registrados", "info");
+                $("#tablaResultados-almacen").html("");
+                return;
+            }
+            mostrarTablaMovimientos(data);
+        }).fail(() => Swal.fire("Error", "No se pudo obtener el historial", "error"));
+    }
+
+    // VER STOCK BAJO
+    function verStockBajo() {
+        $("#formularios-almacen").html("");
+        $.get(BASE_URL_ALMACEN + "/stock-bajo?umbral=" + UMBRAL_STOCK_BAJO, function (data) {
+            if (data.length === 0) {
+                Swal.fire("Info", "No hay artículos con stock bajo (menos de " + UMBRAL_STOCK_BAJO + " unidades)", "info");
+                $("#tablaResultados-almacen").html("");
+                return;
+            }
+            mostrarTablaStockBajo(data);
+        }).fail(() => Swal.fire("Error", "No se pudo obtener el listado de stock bajo", "error"));
+    }
+
+    // TABLA DE MOVIMIENTOS (usada por entrada/salida/historial)
+    function mostrarTablaMovimientos(data) {
+        let html = `
+            <table border="1" cellpadding="5" cellspacing="0">
+                <tr>
+                    <th>Artículo</th>
+                    <th>Tipo</th>
+                    <th>Cantidad</th>
+                    <th>Motivo</th>
+                    <th>Fecha</th>
+                </tr>
+        `;
+        data.forEach(m => {
+            html += `
+                <tr>
+                    <td>${m.nombreArticulo}</td>
+                    <td>${m.tipo}</td>
+                    <td>${m.cantidad}</td>
+                    <td>${m.motivo || "-"}</td>
+                    <td>${m.fecha}</td>
+                </tr>
+            `;
+        });
+        html += "</table>";
+        $("#tablaResultados-almacen").html(html);
+    }
+
+    // TABLA DE STOCK BAJO
+    function mostrarTablaStockBajo(data) {
+        let html = `
+            <table border="1" cellpadding="5" cellspacing="0">
+                <tr>
+                    <th>ID</th>
+                    <th>Artículo</th>
+                    <th>Stock actual</th>
+                </tr>
+        `;
+        data.forEach(a => {
+            html += `
+                <tr>
+                    <td>${a.articuloId}</td>
+                    <td>${a.nombreArticulo}</td>
+                    <td>${a.stock}</td>
+                </tr>
+            `;
+        });
+        html += "</table>";
+        $("#tablaResultados-almacen").html(html);
+    }
 
     // ======================================================================
-    // ALMACEN / REPORTES
-    // Placeholder por ahora - se completan modulo por modulo en los proximos pasos.
+    // REPORTES
+    // Placeholder por ahora - se completa en el proximo paso.
     // ======================================================================
 
 </script>
