@@ -12,11 +12,37 @@
 * **MySQL** (Base de datos relacional)
 * **Maven** (Gestor de dependencias)
 
+## Arquitectura
+
+Capas separadas: Controller → Service → Repository, con DTOs propios en cada
+endpoint (nunca se exponen entidades JPA directamente). Decisiones destacadas:
+
+- **Transacciones**: registro de ventas con @Transactional (rollback completo
+  si falta stock a mitad de una venta con varios ítems)
+- **Soft delete**: artículos y usuarios se desactivan, no se borran, para
+  preservar la integridad referencial con ventas/movimientos históricos
+- **Prevención de ciclos JSON**: @JsonIgnore en relaciones bidireccionales
+  (Venta↔VentaDetalle, Articulo↔Proveedor)
+- **Reportes con SQL nativo y JPQL con proyección a DTO**, según lo que cada
+  consulta necesita
+
 ## Seguridad y Roles
 
-El sistema implementa **Spring Security** para proteger los endpoints según la jerarquía de los usuarios:
-* **`USER`**: Puede listar productos, proveedores, registrar ventas o movimientos y consultar la sección de reportes financieros.
-* **`ADMIN`**: Acceso total al sistema, incluyendo el panel de usuarios (creación, desactivación, cambio de roles).
+El sistema implementa **Spring Security** con autenticación por sesión/Basic Auth
+y contraseñas hasheadas con BCrypt.
+
+* **`USER`**: acceso a todos los módulos operativos del sistema (Productos,
+  Proveedores, Ventas, Almacén, Reportes).
+* **`ADMIN`**: mismo acceso que `USER`, más el panel exclusivo de **Usuarios**
+  (creación, desactivación, cambio de roles) — el único módulo con restricción
+  de rol real a nivel de backend.
+
+  > **Nota de implementación**: actualmente la separación de permisos por rol
+> está aplicada de forma granular solo en `/api/usuarios/**` (exclusivo
+> `ADMIN`). El resto de los endpoints exige estar autenticado, pero no
+> distinguen entre `USER` y `ADMIN` a nivel de ruta. Es una limitación
+> conocida, no un descuido — queda como mejora pendiente extender
+> `SecurityConfig` con reglas por módulo si el caso de uso lo requiere.
 
 ### Credenciales por Defecto (Para Pruebas)
 
@@ -37,7 +63,7 @@ El sistema implementa **Spring Security** para proteger los endpoints según la 
 
 ## Requisitos Previos
 
-* JDK 25 o superior.
+* JDK 21 o superior.
 * MySQL Server activo.
 * Un IDE de preferencia (IntelliJ IDEA, Eclipse, VS Code).
 * **Postman** (Para pruebas de endpoints).
@@ -45,14 +71,65 @@ El sistema implementa **Spring Security** para proteger los endpoints según la 
 ## Configuración e Instalación
 
 ### 1. Clonar el repositorio
+\`\`\`bash
+git clone https://github.com/Iwakura-ar/PrimerProyectoSpringBoot1.git
+cd PrimerProyectoSpringBoot1
+\`\`\`
 
-### 2. Base de Datos
+### 2. Base de datos
+1. Creá la base en MySQL:
+   \`\`\`sql
+   CREATE DATABASE db_ferreteria;
+   \`\`\`
+2. 
+3. Configurá tus credenciales en `src/main/resources/application.properties`:
+   \`\`\`properties
+   spring.datasource.url=jdbc:mysql://localhost:3306/ferreteria
+   spring.datasource.username=tu_usuario
+   spring.datasource.password=tu_contraseña
+   \`\`\`
 
 ### 3. Ejecución
+\`\`\`bash
+mvn clean install
+mvn spring-boot:run
+\`\`\`
 
 La API estará disponible en: `http://localhost:9585`
 
+### 4. Frontend
+Abrí `index.html` en el navegador (o serví la carpeta con Live Server) con el
+backend ya corriendo. La interfaz consume la API en `localhost:9585`.
+
 ## Pruebas con Postman
+
+Todos los endpoints (salvo `/api/auth/**`) requieren autenticación. Usá
+**Basic Auth** en Postman con alguna de las credenciales de la tabla de
+arriba.
+
+1. En cada request, pestaña **Authorization** → tipo **Basic Auth** → usuario
+   y contraseña
+2. Para los endpoints `POST`/`PUT`, pestaña **Body** → **raw** → **JSON**
+
+### Ejemplo: registrar una venta
+\`\`\`
+POST http://localhost:9585/api/ventas
+Body:
+{
+  "usuarioId": 1,
+  "items": [
+    { "articuloId": 3, "cantidad": 2 }
+  ]
+}
+\`\`\`
+
+### Ejemplo: consultar quién está logueado
+\`\`\`
+GET http://localhost:9585/api/auth/me
+\`\`\`
+
+Para el resto de los endpoints, seguí la lista de rutas de la sección
+anterior — cada uno acepta el mismo esquema de autenticación.
 
 ## Endpoints de la API
 
@@ -98,4 +175,4 @@ La API estará disponible en: `http://localhost:9585`
 
 ---
 
-Desarrollado por [Francisco Carloni] (https://github.com/Iwakura-ar) 
+Desarrollado por [Francisco Carloni](https://github.com/Iwakura-ar)
