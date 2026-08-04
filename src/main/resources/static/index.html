@@ -134,7 +134,9 @@
 <div id="seccion-reportes" class="seccion">
     <h3>Reportes</h3>
     <div class="panel" id="panel-reportes">
-        <p class="placeholder">Próximamente</p>
+        <button class="btn-blue" onclick="mostrarFormularioMasVendidos()"><i class="fas fa-chart-bar"></i> Artículos Más Vendidos</button>
+        <button class="btn-blue" onclick="mostrarFormularioVentasPeriodo()"><i class="fas fa-calendar"></i> Ventas por Período</button>
+        <button class="btn-blue" onclick="verValorInventario()"><i class="fas fa-warehouse"></i> Valor del Inventario</button>
     </div>
     <div id="formularios-reportes" style="margin: 20px;"></div>
     <div id="tablaResultados-reportes" class="tablaResultados"></div>
@@ -1176,9 +1178,133 @@
 
     // ======================================================================
     // REPORTES
-    // Placeholder por ahora - se completa en el proximo paso.
     // ======================================================================
+    const BASE_URL_REPORTES = "http://localhost:9585/api/reportes";
 
+    // FORMULARIO ARTICULOS MAS VENDIDOS
+    function mostrarFormularioMasVendidos() {
+        $("#formularios-reportes").html(`
+            <h4>Artículos Más Vendidos</h4>
+            <input type="number" id="repLimit" placeholder="Cantidad a mostrar (ej: 5)"><br>
+            <button class="btn-blue" onclick="verMasVendidos()">Ver Ranking</button>
+        `);
+    }
+
+    // VER ARTICULOS MAS VENDIDOS
+    function verMasVendidos() {
+        const limit = $("#repLimit").val();
+
+        if (!esEnteroPositivo(limit)) {
+            Swal.fire("Error", "Ingresá un número entero positivo", "error");
+            return;
+        }
+
+        $.get(BASE_URL_REPORTES + "/articulos-mas-vendidos?limit=" + limit, function (data) {
+            if (data.length === 0) {
+                Swal.fire("Info", "Todavía no hay ventas registradas", "info");
+                $("#tablaResultados-reportes").html("");
+                return;
+            }
+            mostrarTablaMasVendidos(data);
+        }).fail(() => Swal.fire("Error", "No se pudo obtener el ranking", "error"));
+    }
+
+    // TABLA ARTICULOS MAS VENDIDOS
+    function mostrarTablaMasVendidos(data) {
+        let html = `
+            <table border="1" cellpadding="5" cellspacing="0">
+                <tr>
+                    <th>#</th>
+                    <th>Artículo</th>
+                    <th>Cantidad vendida</th>
+                </tr>
+        `;
+        data.forEach((a, i) => {
+            html += `
+                <tr>
+                    <td>${i + 1}</td>
+                    <td>${a.nombreArticulo}</td>
+                    <td>${a.cantidadVendida}</td>
+                </tr>
+            `;
+        });
+        html += "</table>";
+        $("#tablaResultados-reportes").html(html);
+    }
+
+    // FORMULARIO VENTAS POR PERIODO
+    function mostrarFormularioVentasPeriodo() {
+        $("#formularios-reportes").html(`
+            <h4>Ventas por Período</h4>
+            <label>Desde:</label>
+            <input type="date" id="repDesde"><br>
+            <label>Hasta:</label>
+            <input type="date" id="repHasta"><br>
+            <button class="btn-blue" onclick="verVentasPeriodo()">Consultar</button>
+        `);
+    }
+
+    // VER VENTAS POR PERIODO
+    function verVentasPeriodo() {
+        const desde = $("#repDesde").val();
+        const hasta = $("#repHasta").val();
+
+        if (!desde || !hasta) {
+            Swal.fire("Error", "Completá ambas fechas", "error");
+            return;
+        }
+        if (desde > hasta) {
+            Swal.fire("Error", "La fecha 'desde' no puede ser posterior a 'hasta'", "error");
+            return;
+        }
+
+        $.get(BASE_URL_REPORTES + "/ventas-por-periodo?desde=" + desde + "&hasta=" + hasta, function (data) {
+            if (data.length === 0) {
+                Swal.fire("Info", "No hay ventas registradas en ese período", "info");
+                $("#tablaResultados-reportes").html("");
+                return;
+            }
+            mostrarTablaVentasPeriodo(data);
+        }).fail(() => Swal.fire("Error", "No se pudo obtener el reporte", "error"));
+    }
+
+    // TABLA VENTAS POR PERIODO
+    function mostrarTablaVentasPeriodo(data) {
+        let html = `
+            <table border="1" cellpadding="5" cellspacing="0">
+                <tr>
+                    <th>Fecha</th>
+                    <th>Cantidad de ventas</th>
+                    <th>Total facturado</th>
+                </tr>
+        `;
+        data.forEach(v => {
+            html += `
+                <tr>
+                    <td>${v.fecha}</td>
+                    <td>${v.cantidadVentas}</td>
+                    <td>$${v.totalFacturado}</td>
+                </tr>
+            `;
+        });
+        html += "</table>";
+        $("#tablaResultados-reportes").html(html);
+    }
+
+    // VER VALOR DEL INVENTARIO
+    function verValorInventario() {
+        $("#formularios-reportes").html("");
+        $.get(BASE_URL_REPORTES + "/valor-inventario", function (data) {
+            $("#tablaResultados-reportes").html(`
+                <div style="text-align:center; padding: 30px; background:white; border-radius:10px;">
+                    <h4>Valor Total del Inventario</h4>
+                    <p style="font-size: 2em; font-weight: bold; color: #28a745;">
+                        $${data.valorTotal.toFixed(2)}
+                    </p>
+                </div>
+            `);
+        }).fail(() => Swal.fire("Error", "No se pudo obtener el valor del inventario", "error"));
+    }
 </script>
 
 </body>
