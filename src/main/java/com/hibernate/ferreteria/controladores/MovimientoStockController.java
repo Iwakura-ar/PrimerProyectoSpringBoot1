@@ -19,7 +19,7 @@ public class MovimientoStockController {
     private MovimientoStockService movimientoService;
 
     @PostMapping("/entradas")
-    public ResponseEntity<?> registrarSalida(@RequestBody MovimientoStockRequestDTO request) {
+    public ResponseEntity<?> registrarEntrada(@RequestBody MovimientoStockRequestDTO request) {
         try{
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(movimientoService.registrarEntrada(request));
@@ -30,12 +30,13 @@ public class MovimientoStockController {
     }
 
     @PostMapping("/salidas")
-    public ResponseEntity<?> registrarEntrada(@RequestBody MovimientoStockRequestDTO request) {
+    public ResponseEntity<?> registrarSalida(@RequestBody MovimientoStockRequestDTO request) {
         try {
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(movimientoService.registrarSalida(request));
-        }
-        catch (IllegalStateException e) {
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
