@@ -6,7 +6,7 @@
 
 ## Tecnologías Utilizadas
 
-* **Java 21** (o tu versión actual)
+* **Java 21**
 * **Spring Boot** (Web, Data JPA)
 * **Spring Security** (Autenticación y autorización basada en roles)
 * **MySQL** (Base de datos relacional)
@@ -37,7 +37,7 @@ y contraseñas hasheadas con BCrypt.
   (creación, desactivación, cambio de roles) — el único módulo con restricción
   de rol real a nivel de backend.
 
-  > **Nota de implementación**: actualmente la separación de permisos por rol
+> **Nota de implementación**: actualmente la separación de permisos por rol
 > está aplicada de forma granular solo en `/api/usuarios/**` (exclusivo
 > `ADMIN`). El resto de los endpoints exige estar autenticado, pero no
 > distinguen entre `USER` y `ADMIN` a nivel de ruta. Es una limitación
@@ -51,6 +51,8 @@ y contraseñas hasheadas con BCrypt.
 | `Menem` | `admin123` | `ADMIN` |
 | `vendedor1` | `user123` | `USER` |
 | `Cheney` | `admin123` | `ADMIN` |
+
+Credenciales solo para entorno local de desarrollo, no usar en producción.
 
 ## Módulos del Sistema
 
@@ -84,7 +86,7 @@ cd PrimerProyectoSpringBoot1
 2. 
 3. Configurá tus credenciales en `src/main/resources/application.properties`:
    \`\`\`properties
-   spring.datasource.url=jdbc:mysql://localhost:3306/ferreteria
+   spring.datasource.url=jdbc:mysql://localhost:3306/db_ferreteria
    spring.datasource.username=tu_usuario
    spring.datasource.password=tu_contraseña
    \`\`\`
@@ -133,7 +135,7 @@ anterior — cada uno acepta el mismo esquema de autenticación.
 
 ## Endpoints de la API
 
-### Productos (`USER` / `ADMIN`)
+### Productos
 * `GET /api/articulos` - Lista todos los artículos (con precio y stock).
 * `GET /api/articulos/{id}` - Listar un artículo con determinado id.
 * `POST /api/articulos` - Registra un nuevo artículo.
@@ -142,7 +144,7 @@ anterior — cada uno acepta el mismo esquema de autenticación.
 * `PUT /api/articulos/{id}/activar` - Reactivar un artículo desactivado del listado previamente (Ej. por ingreso de stock).
 * `GET /api/articulos/inactivos` - Listar artículos desactivados y ocultados del listado (Ej. por falta de stock).
 
-### Proveedores (`USER` / `ADMIN`)
+### Proveedores 
 * `GET /api/proveedores` - Lista los proveedores y su información de contacto.
 * `GET /api/proveedores/{id}` - Buscar proveedor por id.
 * `POST /api/proveedores` - Registra un nuevo proveedor.
@@ -151,24 +153,24 @@ anterior — cada uno acepta el mismo esquema de autenticación.
 * `PUT /api/proveedores/{id}/articulos` - Asociar artículos a un proveedor (articulos provistos por este).
 * `DELETE /api/proveedores/{id}/articulos/{articuloId}` - Desasociar un artículo de un proveedor.
 
-### Ventas (`USER` / `ADMIN`)
+### Ventas
 * `POST /api/ventas` - Registra una nueva venta (guarda fecha, usuario, detalle y total automatizado).
 * `GET /api/ventas` - Historial general de ventas realizadas con detalle consultable.
 * `GET /api/ventas/{id}` - Buscar venta por id.
 
-### Almacén (`USER` / `ADMIN`)
-* `POST /api/almacen/entradas` - Registrar salidas manuales de stock (Ej. unidades defectuosas, rotas o pérdidas).
-* `POST /api/almacen/salidas` - Registrar entradas manuales de stock (Ej. Compra de mercadería).
+### Almacén 
+* `POST /api/almacen/entradas` - Registrar entradas manuales de stock (Ej. Compra de mercadería). 
+* `POST /api/almacen/salidas` - Registrar salidas manuales de stock (Ej. unidades defectuosas, rotas o pérdidas).
 * `GET /api/almacen/articulo/{articuloId}` - Consultar el historial de movimientos de un artículo (por su id).
 * `GET /api/almacen/articulo/stock-bajo` - Listar aquellos artículos con stock bajo (Actualmente, menor a 10 unidades).
 
-### Reportes (`USER` / `ADMIN`)
+### Reportes 
 * `GET /api/reportes/articulos-mas-vendidos` - Listar productos más vendidos.
 * `GET /api/reportes/valor-inventario` - Calcula el valor monetario total del inventario actual.
 * `GET /api/reportes/ventas-por-periodo` - Total facturado en un rango de fechas.
 
 ### Usuarios (Exclusivo ADMIN)
-* `GET /api/usuarios/` - Listar todos los usuarios registrados.
+* `GET /api/usuarios` - Listar todos los usuarios registrados.
 * `POST /api/usuarios` - Crea un nuevo usuario en el sistema.
 * `DELETE /api/usuarios/{id}` - Desactivar un usuario.
 * `PUT /api/usuarios/{id}/rol` - Cambia el rol de un usuario (`USER` / `ADMIN`).
