@@ -86,7 +86,9 @@ cd PrimerProyectoSpringBoot1
 2. Creá las tablas ejecutando los scripts SQL del proyecto, o dejá que
       Hibernate las genere automáticamente en el primer arranque
       (`spring.jpa.hibernate.ddl-auto=update` en `application.properties`)
-3. Configurá tus credenciales en `src/main/resources/application.properties`:
+3. Copiá `application.properties.example` a `application.properties` y completá 
+tus credenciales locales de MySQL.
+
    \`\`\`properties
    spring.datasource.url=jdbc:mysql://localhost:3306/db_ferreteria
    spring.datasource.username=tu_usuario
