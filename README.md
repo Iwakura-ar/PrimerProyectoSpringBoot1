@@ -1,16 +1,18 @@
 # Ferretería Stahlmann - Sistema de Control de Stock
 
-> Aplicación backend robusta para la gestión de inventario, proveedores, ventas y reportes de una ferretería en tiempo real.
+> Aplicación backend robusta para la gestión de inventario, proveedores, ventas y reportes de una ferretería.
 
 ---
 
 ## Tecnologías Utilizadas
 
 * **Java 21**
+* **Frontend**: HTML/CSS + jQuery + SweetAlert2 (sin framework)
 * **Spring Boot** (Web, Data JPA)
 * **Spring Security** (Autenticación y autorización basada en roles)
 * **MySQL** (Base de datos relacional)
 * **Maven** (Gestor de dependencias)
+
 
 ## Arquitectura
 
@@ -73,33 +75,33 @@ Credenciales solo para entorno local de desarrollo, no usar en producción.
 ## Configuración e Instalación
 
 ### 1. Clonar el repositorio
-\`\`\`bash
+```bash
 git clone https://github.com/Iwakura-ar/PrimerProyectoSpringBoot1.git
 cd PrimerProyectoSpringBoot1
-\`\`\`
+```
 
 ### 2. Base de datos
 1. Creá la base en MySQL:
-   \`\`\`sql
+   ```sql
    CREATE DATABASE db_ferreteria;
-   \`\`\`
+   ```
 2. Creá las tablas ejecutando los scripts SQL del proyecto, o dejá que
       Hibernate las genere automáticamente en el primer arranque
       (`spring.jpa.hibernate.ddl-auto=update` en `application.properties`)
 3. Copiá `application.properties.example` a `application.properties` y completá 
 tus credenciales locales de MySQL.
 
-   \`\`\`properties
+   ```properties
    spring.datasource.url=jdbc:mysql://localhost:3306/db_ferreteria
    spring.datasource.username=tu_usuario
    spring.datasource.password=tu_contraseña
-   \`\`\`
+   ```
 
 ### 3. Ejecución
-\`\`\`bash
+```bash
 mvn clean install
 mvn spring-boot:run
-\`\`\`
+```
 
 La API estará disponible en: `http://localhost:9585`
 
@@ -118,7 +120,7 @@ arriba.
 2. Para los endpoints `POST`/`PUT`, pestaña **Body** → **raw** → **JSON**
 
 ### Ejemplo: registrar una venta
-\`\`\`
+```
 POST http://localhost:9585/api/ventas
 Body:
 {
@@ -127,12 +129,12 @@ Body:
     { "articuloId": 3, "cantidad": 2 }
   ]
 }
-\`\`\`
+```
 
 ### Ejemplo: consultar quién está logueado
-\`\`\`
+```
 GET http://localhost:9585/api/auth/me
-\`\`\`
+```
 
 Para el resto de los endpoints, seguí la lista de rutas de la sección
 anterior — cada uno acepta el mismo esquema de autenticación.
