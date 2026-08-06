@@ -83,7 +83,9 @@ cd PrimerProyectoSpringBoot1
    \`\`\`sql
    CREATE DATABASE db_ferreteria;
    \`\`\`
-2. 
+2. Creá las tablas ejecutando los scripts SQL del proyecto, o dejá que
+      Hibernate las genere automáticamente en el primer arranque
+      (`spring.jpa.hibernate.ddl-auto=update` en `application.properties`)
 3. Configurá tus credenciales en `src/main/resources/application.properties`:
    \`\`\`properties
    spring.datasource.url=jdbc:mysql://localhost:3306/db_ferreteria
@@ -162,7 +164,7 @@ anterior — cada uno acepta el mismo esquema de autenticación.
 * `POST /api/almacen/entradas` - Registrar entradas manuales de stock (Ej. Compra de mercadería). 
 * `POST /api/almacen/salidas` - Registrar salidas manuales de stock (Ej. unidades defectuosas, rotas o pérdidas).
 * `GET /api/almacen/articulo/{articuloId}` - Consultar el historial de movimientos de un artículo (por su id).
-* `GET /api/almacen/articulo/stock-bajo` - Listar aquellos artículos con stock bajo (Actualmente, menor a 10 unidades).
+* `GET /api/almacen/stock-bajo?umbral=N` - Listar aquellos artículos con stock bajo (10 artículos por defecto).
 
 ### Reportes 
 * `GET /api/reportes/articulos-mas-vendidos` - Listar productos más vendidos.
