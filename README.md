@@ -139,6 +139,8 @@ GET http://localhost:9585/api/auth/me
 Para el resto de los endpoints, seguí la lista de rutas de la sección
 anterior — cada uno acepta el mismo esquema de autenticación.
 
+Importá la colección completa desde [`/postman/Ferreteria_Stahlmann.postman_collection.json`](./postman/Ferreteria_Stahlmann.postman_collection.json).
+
 ## Endpoints de la API
 
 ### Productos
