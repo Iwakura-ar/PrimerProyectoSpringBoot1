@@ -13,6 +13,13 @@
 * **MySQL** (Base de datos relacional)
 * **Maven** (Gestor de dependencias)
 
+## Capturas
+
+![Pantalla de Ventas](./screenshots/ventas.png)
+![Pantalla de Ventas](./screenshots/ventas2.png)
+![Reporte de artículos más vendidos](./screenshots/reportes.png)
+![Reporte de artículos más vendidos](./screenshots/reportes2.png)
+
 
 ## Arquitectura
 
