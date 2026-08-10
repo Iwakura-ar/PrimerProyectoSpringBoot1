@@ -39,6 +39,13 @@ public class SecurityConfig {
                         .requestMatchers("/api/usuarios/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login")
+                        .invalidateHttpSession(true)
+                        .clearAuthentication(true)
+                        .permitAll()
+                )
                 .authenticationManager(authManger)
                 .userDetailsService(userServ)
                 .formLogin(form -> form
@@ -46,6 +53,7 @@ public class SecurityConfig {
                         .permitAll()
                 )
                 .httpBasic(basic -> {});
+
                 return http.build();
     }
 
